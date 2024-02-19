@@ -5,16 +5,11 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const DATE_FORMAT = 'MMM D';
-const TIME_FORMAT = 'hh:mm';
-const DATE_FORMAT_FULL = 'DD/MM/YY hh:mm';
-
-
-export const getRandomArrayElement = (items) => items[Math.floor(Math.random() * items.length)];
+export const DATE_FORMAT = 'MMM D';
+export const TIME_FORMAT = 'hh:mm';
+export const DATE_FORMAT_FULL = 'DD/MM/YY hh:mm';
 
 export const formatDate = (dueDate) => dueDate ? dayjs(dueDate).format(DATE_FORMAT) : '';
-
-export const formatDateFull = (dueDate) => dueDate ? dayjs.utc(dueDate).format(DATE_FORMAT_FULL) : '';
 
 export const formatTime = (dueTime) => dueTime ? dayjs.utc(dueTime).format(TIME_FORMAT) : '';
 
