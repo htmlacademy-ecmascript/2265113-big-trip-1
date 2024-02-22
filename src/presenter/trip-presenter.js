@@ -1,24 +1,48 @@
-import AddNewPointView from '../view/add-new-point-view.js';
 import EditPointView from '../view/edit-point-view.js';
-import NewFilterView from '../view/filter-view.js';
+import FilterView from '../view/filter-view.js';
 import PointView from '../view/point-view.js';
-import NewSortView from '../view/sort-view.js';
-import {render, RenderPosition} from '../render.js';
-
-const POINTS_COUNT = 3;
-
-const filtersContainer = document.querySelector('.trip-controls__filters');
-const eventsContainer = document.querySelector('.trip-events');
+import SortView from '../view/sort-view.js';
+import {render} from '../render.js';
+import PointsModel from '../model/point-model.js';
 
 export default class TripPresenter {
-  init() {
-    render(new EditPointView(), eventsContainer, RenderPosition.AFTERBEGIN);
-    render(new AddNewPointView(), eventsContainer);
-    render(new NewSortView(), eventsContainer);
-    render(new NewFilterView(), filtersContainer);
+  constructor({filtersContainer, eventsContainer}) {
+    this.filtersContainer = filtersContainer;
+    this.eventsContainer = eventsContainer;
+    this.pointsModel = new PointsModel();
+  }
 
-    for (let i = 0; i < POINTS_COUNT; i++) {
-      render(new PointView(), eventsContainer);
+  init() {
+    this.tripPoints = [...this.pointsModel.getPoints()];
+    this.tripDestinations = [...this.pointsModel.getDestinations()];
+
+    const tripEventsList = this.eventsContainer.querySelector('.trip-events__list');
+    const tripEventsSortView = this.eventsContainer.querySelector('.trip-events__sort-view');
+
+    // this.defaultPoint = getDefaultPoint();
+
+    // render(new EditPointView({
+    //   point: this.defaultPoint,
+    //   offers: this.tripOffers[this.defaultPoint.type],
+    //   destinations: this.tripDestinations,
+    // }), this.eventsContainer);
+
+    render(new SortView(), tripEventsSortView);
+    render(new FilterView(), this.filtersContainer);
+
+    const editPoint = this.tripPoints[6];
+    const pointTypes = this.pointsModel.getPointTypes();
+
+    render(new EditPointView({
+      point: editPoint,
+      pointTypes,
+      destinations: this.tripDestinations,
+    }), tripEventsList);
+
+    for (let i = 0; i < this.tripPoints.length; i++) {
+      render(new PointView({
+        point: this.tripPoints[i],
+      }), tripEventsList);
     }
   }
 }
