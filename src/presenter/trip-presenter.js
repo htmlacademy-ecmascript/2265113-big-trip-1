@@ -19,14 +19,6 @@ export default class TripPresenter {
     const tripEventsList = this.eventsContainer.querySelector('.trip-events__list');
     const tripEventsSortView = this.eventsContainer.querySelector('.trip-events__sort-view');
 
-    // this.defaultPoint = getDefaultPoint();
-
-    // render(new EditPointView({
-    //   point: this.defaultPoint,
-    //   offers: this.tripOffers[this.defaultPoint.type],
-    //   destinations: this.tripDestinations,
-    // }), this.eventsContainer);
-
     render(new SortView(), tripEventsSortView);
     render(new FilterView(), this.filtersContainer);
 
