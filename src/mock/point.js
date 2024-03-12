@@ -288,12 +288,12 @@ export const points = [
 ];
 
 export const getDefaultPoint = () => ({
-  id: 'new',
-  basePrice: 0,
-  date_from: new Date().toISOString(),
-  date_to: new Date().toISOString(),
-  destination: 0,
-  isFavorite: false,
-  offers: [],
-  type: '',
+  'id': 'new',
+  'base_price': 0,
+  'date_from': new Date().toISOString(),
+  'date_to': new Date().toISOString(),
+  'destination': 0,
+  'is_favorite': false,
+  'offers': [],
+  'type': '',
 });

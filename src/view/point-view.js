@@ -1,19 +1,20 @@
-import {createElement} from '../render.js';
-import { formatDate, formatTime, differenceTime } from '../utils.js';
+import dayjs from 'dayjs';
+import AbstractView from '../framework/view/abstract-view.js';
+import { DATE_FORMAT, TIME_FORMAT, differenceTime } from '../utils.js';
 
 function createPointTemplate(point) {
   return `<li class="trip-events__item">
   <div class="event">
-    <time class="event__date" datetime=${formatDate(point.date_from, 'full-date')}>${formatDate(point.date_from, 'custom')}</time>
+    <time class="event__date" datetime=${dayjs(point.date_from, 'full-date').format(DATE_FORMAT)}>${dayjs(point.date_from, 'custom').format(DATE_FORMAT)}</time>
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${point.type.toLowerCase()}.png" alt="Event type icon">
     </div>
     <h3 class="event__title">${point.type} ${point.destinationEntity.name}</h3>
     <div class="event__schedule">
       <p class="event__time">
-        <time class="event__start-time" datetime=${formatTime(point.date_from)}>${formatTime(point.date_from)}</time>
+        <time class="event__start-time" datetime=${dayjs(point.date_from).format(TIME_FORMAT)}>${dayjs(point.date_from).format(TIME_FORMAT)}</time>
         &mdash;
-        <time class="event__end-time" datetime=${formatTime(point.date_to)}>${formatTime(point.date_to)}</time>
+        <time class="event__end-time" datetime=${dayjs(point.date_to).format(TIME_FORMAT)}>${dayjs(point.date_to).format(TIME_FORMAT)}</time>
       </p>
       <p class="event__duration">${differenceTime(point.date_to, point.date_from)}</p>
     </div>
@@ -23,11 +24,12 @@ function createPointTemplate(point) {
     <h4 class="visually-hidden">Offers:</h4>
     <ul class="event__selected-offers">
   ${point.offersEntity.map((offer) => (
-    `<li class="event__offer">
+    `${point.offers.includes(offer.id) ?
+      `<li class="event__offer">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${offer.price}</span>
-      </li>`
+      </li>` : ''}`
   )).join('')}
     </ul>
     <button class="event__favorite-btn ${point.is_favorite ? 'event__favorite-btn--active' : ''}" type="button">
@@ -43,26 +45,24 @@ function createPointTemplate(point) {
 </li>`;
 }
 
-export default class PointView {
-  constructor({point, offers, destination}) {
-    this.point = point;
-    this.offers = offers;
-    this.destination = destination;
+export default class PointView extends AbstractView {
+  #point = null;
+  #handleEditClick = null;
+
+  constructor({point, onEditClick}) {
+    super();
+    this.#point = point;
+    this.#handleEditClick = onEditClick;
+
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
   }
 
-  getTemplate() {
-    return createPointTemplate(this.point, this.offers, this.destination);
+  get template() {
+    return createPointTemplate(this.#point);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 }
