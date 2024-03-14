@@ -9,10 +9,6 @@ export const DATE_FORMAT = 'MMM D';
 export const TIME_FORMAT = 'hh:mm';
 export const DATE_FORMAT_FULL = 'DD/MM/YY hh:mm';
 
-export const formatDate = (dueDate) => dueDate ? dayjs(dueDate).format(DATE_FORMAT) : '';
-
-export const formatTime = (dueTime) => dueTime ? dayjs.utc(dueTime).format(TIME_FORMAT) : '';
-
 export const differenceTime = (toTime, fromTime) => {
   const diffMin = dayjs.utc(toTime).diff(fromTime, 'minute');
   const diffHour = dayjs.utc(toTime).diff(fromTime, 'hour');
