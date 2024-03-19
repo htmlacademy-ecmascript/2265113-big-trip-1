@@ -4,6 +4,8 @@ import PointView from '../view/point-view.js';
 import SortView from '../view/sort-view.js';
 import {render, replace} from '../framework/render.js';
 import PointsModel from '../model/point-model.js';
+import NoPointView from '../view/no-point-view.js';
+import {generateFilter} from '../mock/filter.js';
 
 export default class TripPresenter {
   #filtersContainer = null;
@@ -23,14 +25,7 @@ export default class TripPresenter {
     this.#tripPoints = [...this.#pointsModel.tripPoints];
     this.#tripDestinations = [...this.#pointsModel.tripDestinations];
 
-    const tripEventsSortView = this.#eventsContainer.querySelector('.trip-events__sort-view');
-
-    render(new SortView(), tripEventsSortView);
-    render(new FilterView(), this.#filtersContainer);
-
-    for (let i = 0; i < this.#tripPoints.length; i++) {
-      this.#renderPoint(this.#tripPoints[i]);
-    }
+    this.#renderTrip();
   }
 
   #renderPoint(point) {
@@ -70,5 +65,22 @@ export default class TripPresenter {
     }
 
     render(pointComponent, this.#eventsContainer.querySelector('.trip-events__list'));
+  }
+
+  #renderTrip() {
+    const tripEventsSortView = this.#eventsContainer.querySelector('.trip-events__sort-view');
+    const filters = generateFilter(this.#tripPoints);
+
+    render(new SortView(), tripEventsSortView);
+    render(new FilterView({filters}), this.#filtersContainer);
+
+    if (this.#tripPoints.length < 1) {
+      render(new NoPointView(), this.#eventsContainer.querySelector('.trip-events__list'));
+      return;
+    }
+
+    for (let i = 0; i < this.#tripPoints.length; i++) {
+      this.#renderPoint(this.#tripPoints[i]);
+    }
   }
 }

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import AbstractView from '../framework/view/abstract-view.js';
-import { DATE_FORMAT_FULL } from '../utils.js';
+import { DATE_FORMAT_FULL } from '../utils/point.js';
 
 function createEditPointTemplate(point, pointTypes, destinations) {
   return `<form class="event event--edit" action="#" method="post">
