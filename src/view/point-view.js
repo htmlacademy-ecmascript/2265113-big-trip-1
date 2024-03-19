@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import AbstractView from '../framework/view/abstract-view.js';
-import { DATE_FORMAT, TIME_FORMAT, differenceTime } from '../utils.js';
+import { DATE_FORMAT, TIME_FORMAT, differenceTime } from '../utils/point.js';
 
 function createPointTemplate(point) {
   return `<li class="trip-events__item">
