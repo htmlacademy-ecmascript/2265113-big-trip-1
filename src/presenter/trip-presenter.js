@@ -1,16 +1,19 @@
-import EditPointView from '../view/edit-point-view.js';
 import FilterView from '../view/filter-view.js';
-import PointView from '../view/point-view.js';
 import SortView from '../view/sort-view.js';
-import {render, replace} from '../framework/render.js';
+import {render, RenderPosition} from '../framework/render.js';
 import PointsModel from '../model/point-model.js';
 import NoPointView from '../view/no-point-view.js';
 import {generateFilter} from '../mock/filter.js';
+import PointPresenter from './point-presenter.js';
+import { updateItem } from '../utils/common.js';
 
 export default class TripPresenter {
   #filtersContainer = null;
   #eventsContainer = null;
   #pointsModel = null;
+  #sortComponent = new SortView();
+  #noPointComponent = new NoPointView();
+  #pointPresenters = new Map();
 
   #tripPoints = [];
   #tripDestinations = [];
@@ -28,59 +31,56 @@ export default class TripPresenter {
     this.#renderTrip();
   }
 
-  #renderPoint(point) {
-    const pointTypes = this.#pointsModel.tripPointTypes;
-    const destinations = this.#tripDestinations;
-
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
-    const pointComponent = new PointView({
-      point,
-      onEditClick: () => {
-        replaceCardToForm();
-        document.addEventListener('keydown', escKeyDownHandler);
-      }
-    });
-    const editPointComponent = new EditPointView({
-      point,
-      pointTypes,
-      destinations,
-      onFormSubmit: () => {
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
+  #renderPoint(point, pointTypes, destinations) {
+    const pointPresenter = new PointPresenter({
+      eventsContainer: this.#eventsContainer.querySelector('.trip-events__list'),
+      onDataChange: this.#handlePointChange,
+      onModeChange: this.#handleModeChange
     });
 
-    function replaceCardToForm() {
-      replace(editPointComponent, pointComponent);
-    }
-
-    function replaceFormToCard() {
-      replace(pointComponent, editPointComponent);
-    }
-
-    render(pointComponent, this.#eventsContainer.querySelector('.trip-events__list'));
+    pointPresenter.init(point, pointTypes, destinations);
+    this.#pointPresenters.set(point.id, pointPresenter);
   }
 
   #renderTrip() {
-    const tripEventsSortView = this.#eventsContainer.querySelector('.trip-events__sort-view');
-    const filters = generateFilter(this.#tripPoints);
-
-    render(new SortView(), tripEventsSortView);
-    render(new FilterView({filters}), this.#filtersContainer);
+    this.#renderSort();
+    this.#renderFilter();
 
     if (this.#tripPoints.length < 1) {
-      render(new NoPointView(), this.#eventsContainer.querySelector('.trip-events__list'));
+      this.#renderNoPoint();
       return;
     }
 
     for (let i = 0; i < this.#tripPoints.length; i++) {
-      this.#renderPoint(this.#tripPoints[i]);
+      this.#renderPoint(this.#tripPoints[i], this.#pointsModel.tripPointTypes, this.#tripDestinations);
     }
+  }
+
+  #handlePointChange = (updatedPoint) => {
+    this.#tripPoints = updateItem(this.#tripPoints, updatedPoint);
+    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint, this.#pointsModel.tripPointTypes, this.#tripDestinations);
+  };
+
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
+  #clearPointList() {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
+  }
+
+  #renderSort() {
+    render(this.#sortComponent, this.#eventsContainer.querySelector('.trip-events__sort-view'), RenderPosition.AFTERBEGIN);
+  }
+
+  #renderNoPoint() {
+    render(this.#noPointComponent, this.#eventsContainer.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
+  }
+
+  #renderFilter() {
+    const filters = generateFilter(this.#tripPoints);
+
+    render(new FilterView({filters}), this.#filtersContainer);
   }
 }
