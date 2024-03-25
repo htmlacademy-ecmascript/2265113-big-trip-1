@@ -4,3 +4,9 @@ export const FilterType = {
   PRESENT: 'present',
   PAST: 'past',
 };
+
+export const SortType = {
+  DEFAULT: 'default',
+  TIME: 'time',
+  PRICE: 'price'
+};

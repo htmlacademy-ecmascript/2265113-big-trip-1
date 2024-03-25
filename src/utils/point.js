@@ -16,3 +16,12 @@ export const differenceTime = (toTime, fromTime) => {
   return diffMin < 60 ? `${diffMin + 1}m` : `${diffHour}h ${diffResult + 1}m`;
 };
 
+export function sortByTime(pointA, pointB) {
+  const pointBTime = differenceTime(pointB.date_to, pointB.date_from);
+  const pointATime = differenceTime(pointA.date_to, pointA.date_from);
+  return parseFloat(pointBTime, 10) - parseFloat(pointATime, 10);
+}
+
+export function sortByPrice(pointA, pointB) {
+  return pointB.base_price - pointA.base_price;
+}
