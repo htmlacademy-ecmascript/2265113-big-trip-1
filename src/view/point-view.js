@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import AbstractView from '../framework/view/abstract-view.js';
-import { DATE_FORMAT, TIME_FORMAT, differenceTime } from '../utils/point.js';
+import { DATE_FORMAT, TIME_FORMAT, formatDuration } from '../utils/point.js';
 
 function createPointTemplate(point) {
   return `<li class="trip-events__item">
@@ -16,7 +16,7 @@ function createPointTemplate(point) {
         &mdash;
         <time class="event__end-time" datetime=${dayjs(point.date_to).format(TIME_FORMAT)}>${dayjs(point.date_to).format(TIME_FORMAT)}</time>
       </p>
-      <p class="event__duration">${differenceTime(point.date_to, point.date_from)}</p>
+      <p class="event__duration">${formatDuration(point.duration)}</p>
     </div>
     <p class="event__price">
       &euro;&nbsp;<span class="event__price-value">${point.base_price}</span>

@@ -1,6 +1,7 @@
 import { points } from '../mock/point.js';
 import { offers } from '../mock/offers.js';
 import { destinations } from '../mock/destinations.js';
+import dayjs from 'dayjs';
 
 export default class PointsModel {
   #points = {};
@@ -16,6 +17,7 @@ export default class PointsModel {
     this.#destinations = destinations;
     this.#points = points.map((point) => ({
       ...point,
+      duration: dayjs(point.date_to).diff(point.date_from, 'minutes'),
       destinationEntity: this.#destinations.find((dest) => dest.id === point.destination),
       offersEntity: this.offers[point.type]
     }));
