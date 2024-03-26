@@ -13,7 +13,7 @@ export default class TripPresenter {
   #filtersContainer = null;
   #eventsContainer = null;
   #pointsModel = null;
-  #activePointId = null;
+  #activePoint = null;
   #sortComponent = null;
   #noPointComponent = new NoPointView();
   #pointPresenters = new Map();
@@ -87,8 +87,11 @@ export default class TripPresenter {
     this.#currentSortType = sortType;
   }
 
-  #handleModeChange = () => {
-    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  #handleModeChange = (point) => {
+    if (this.#activePoint) {
+      this.#pointPresenters.get(this.#activePoint.id).resetView();
+    }
+    this.#activePoint = point;
   };
 
   #clearPointList() {
