@@ -20,7 +20,6 @@ export default class PointsModel {
       allOffers: this.offers,
       duration: dayjs(point.date_to).diff(point.date_from, 'minutes'),
       destinationEntity: this.#destinations.find((dest) => dest.id === point.destination),
-      offersEntity: this.offers[point.type]
     }));
   }
 

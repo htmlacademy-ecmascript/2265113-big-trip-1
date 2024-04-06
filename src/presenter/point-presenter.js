@@ -31,37 +31,12 @@ export default class PointPresenter {
     this.#pointTypes = pointTypes;
     this.#destinations = destinations;
 
-    const prevPointComponent = this.#pointComponent;
-    const prevPointEditComponent = this.#pointEditComponent;
-
     this.#pointComponent = new PointView({
-      point,
+      point: this.#point,
       onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick,
     });
-    this.#pointEditComponent = new EditPointView({
-      point,
-      pointTypes,
-      destinations,
-      onFormSubmit: this.#handleFormSubmit,
-    });
-
-    if (prevPointComponent === null || prevPointEditComponent === null) {
-      render(this.#pointComponent, this.#eventsContainer);
-
-      return;
-    }
-
-    if (this.#mode === Mode.DEFAULT) {
-      replace(this.#pointComponent, prevPointComponent);
-    }
-
-    if (this.#mode === Mode.EDITING) {
-      replace(this.#pointEditComponent, prevPointEditComponent);
-    }
-
-    remove(prevPointComponent);
-    remove(prevPointEditComponent);
+    render(this.#pointComponent, this.#eventsContainer);
   }
 
   destroy() {
@@ -76,13 +51,32 @@ export default class PointPresenter {
   }
 
   #replaceCardToForm() {
+    remove(this.#pointEditComponent);
+
+    this.#pointEditComponent = new EditPointView({
+      point: this.#point,
+      pointTypes: this.#pointTypes,
+      destinations: this.#destinations,
+      onFormSubmit: this.#handleFormSubmit,
+      onViewClick: this.#handleViewClick,
+    });
+
     replace(this.#pointEditComponent, this.#pointComponent);
+
     document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#handleModeChange(this.#point);
     this.#mode = Mode.EDITING;
   }
 
   #replaceFormToCard() {
+    remove(this.#pointComponent);
+
+    this.#pointComponent = new PointView({
+      point: this.#point,
+      onEditClick: this.#handleEditClick,
+      onFavoriteClick: this.#handleFavoriteClick,
+    });
+
     replace(this.#pointComponent, this.#pointEditComponent);
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.DEFAULT;
@@ -95,16 +89,22 @@ export default class PointPresenter {
     }
   };
 
+  #handleViewClick = () => {
+    this.#replaceFormToCard();
+  };
+
   #handleEditClick = () => {
     this.#replaceCardToForm();
   };
 
   #handleFavoriteClick = () => {
-    this.#handleDataChange({...this.#point, is_favorite: !this.#point.is_favorite});
+    this.#point = {...this.#point, is_favorite: !this.#point.is_favorite};
+    this.#handleDataChange(this.#point);
   };
 
   #handleFormSubmit = (point) => {
-    this.#handleDataChange(point);
+    this.#point = point;
+    this.#handleDataChange(this.#point);
     this.#replaceFormToCard();
   };
 }

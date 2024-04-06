@@ -3,9 +3,6 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { DATE_FORMAT_FULL } from '../utils/point.js';
 
 function createEditPointTemplate(point, pointTypes, destinations) {
-  const offersByType = point.allOffers[point.type];
-  const currentDestination = destinations.find((dest) => dest.id === point.destination);
-
   return `<form class="event event--edit" action="#" method="post">
   <header class="event__header">
     <div class="event__type-wrapper">
@@ -30,7 +27,7 @@ ${pointTypes.map((pointType) => (
       <label class="event__label  event__type-output" for="event-destination-${point.id}">
       ${point.type}
       </label>
-      <input class="event__input  event__input--destination" id="event-destination-${point.id}" type="text" name="event-destination" value="${currentDestination.name || ''}" list="destination-list-${point.id}">
+      <input class="event__input  event__input--destination" id="event-destination-${point.id}" type="text" name="event-destination" value="${point.destinationEntity.name || ''}" list="destination-list-${point.id}">
       <datalist id="destination-list-${point.id}">
         ${destinations.map((dest) =>`<option value="${dest.name}"></option>`).join('')}
       </datalist>
@@ -58,11 +55,11 @@ ${pointTypes.map((pointType) => (
   ) : ''}
   </header>
   <section class="event__details">
-    ${offersByType.length ?
+    ${point.allOffers[point.type].length ?
     `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${offersByType.map((offer) => (
+        ${point.allOffers[point.type].map((offer) => (
     `<div class="event__offer-selector">
           <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${point.id}" type="checkbox" name="event-offer-${offer.title}"
 ${point.offers.includes(offer.id) ? 'checked' : ''}>
@@ -80,12 +77,12 @@ ${point.offers.includes(offer.id) ? 'checked' : ''}>
     ${point.destination ? (
     `<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-      <p class="event__destination-description">${currentDestination.description}</p>
+      <p class="event__destination-description">${point.destinationEntity.description}</p>
 
-      ${currentDestination.pictures.length > 0 ? (
+      ${point.destinationEntity.pictures.length > 0 ? (
       `<div class="event__photos-container">
         <div class="event__photos-tape">
-          ${currentDestination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
+          ${point.destinationEntity.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
       </div>
     </div>`
     ) : ''}
@@ -101,16 +98,18 @@ export default class EditPointView extends AbstractStatefulView {
   #pointTypes = null;
   #destinations = null;
   #handleFormSubmit = null;
+  #handleViewClick = null;
 
-  constructor({point, pointTypes, destinations, onFormSubmit}) {
+  constructor({point, pointTypes, destinations, onFormSubmit, onViewClick}) {
     super();
     this._setState(point);
     this.#pointTypes = pointTypes;
     this.#destinations = destinations;
     this.#handleFormSubmit = onFormSubmit;
+    this.#handleViewClick = onViewClick;
 
-    this.element.addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formSubmitHandler);
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#handleSaveButtonClick);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleCloseButtonClick);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeToggleHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
   }
@@ -119,37 +118,43 @@ export default class EditPointView extends AbstractStatefulView {
     return createEditPointTemplate(this._state, this.#pointTypes, this.#destinations);
   }
 
-  #formSubmitHandler = (evt) => {
+  #handleCloseButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#handleViewClick();
+  };
+
+  #handleSaveButtonClick = (evt) => {
     evt.preventDefault();
     this.#handleFormSubmit(this._state);
   };
 
   #typeToggleHandler = (evt) => {
     evt.preventDefault();
+
     this.updateElement({
       type: evt.target.value,
-      offers: []
+      offers: [],
     });
   };
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    const selectedDestination = this.#destinations.find((elem) => elem.name === evt.target.value);
-    const selectedDestinationId = (selectedDestination) ? selectedDestination.id : null;
 
-    if (!selectedDestination) {
+    const destination = this.#destinations.find((dest) => dest.name === evt.target.value);
+    if (!destination) {
       return;
     }
 
     this.updateElement({
-      destination: selectedDestinationId
+      destination: destination.id,
+      destinationEntity: destination,
     });
   };
 
   _restoreHandlers = () => {
-    this.element.addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formSubmitHandler);
-    this.element.querySelector('.event__type-toggle').addEventListener('change', this.#typeToggleHandler);
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#handleSaveButtonClick);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleCloseButtonClick);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#typeToggleHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
   };
 }
