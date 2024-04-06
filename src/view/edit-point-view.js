@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { DATE_FORMAT_FULL } from '../utils/point.js';
 
 function createEditPointTemplate(point, pointTypes, destinations) {
@@ -55,11 +55,11 @@ ${pointTypes.map((pointType) => (
   ) : ''}
   </header>
   <section class="event__details">
-    ${point.offers.length ?
+    ${point.allOffers[point.type].length ?
     `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${point.offersEntity.map((offer) => (
+        ${point.allOffers[point.type].map((offer) => (
     `<div class="event__offer-selector">
           <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${point.id}" type="checkbox" name="event-offer-${offer.title}"
 ${point.offers.includes(offer.id) ? 'checked' : ''}>
@@ -94,29 +94,67 @@ ${point.offers.includes(offer.id) ? 'checked' : ''}>
 </form>`;
 }
 
-export default class EditPointView extends AbstractView {
-  #point = null;
+export default class EditPointView extends AbstractStatefulView {
   #pointTypes = null;
   #destinations = null;
   #handleFormSubmit = null;
+  #handleViewClick = null;
 
-  constructor({point, pointTypes, destinations, onFormSubmit}) {
+  constructor({point, pointTypes, destinations, onFormSubmit, onViewClick}) {
     super();
-    this.#point = point;
+    this._setState(point);
     this.#pointTypes = pointTypes;
     this.#destinations = destinations;
     this.#handleFormSubmit = onFormSubmit;
+    this.#handleViewClick = onViewClick;
 
-    this.element.addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formSubmitHandler);
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#handleSaveButtonClick);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleCloseButtonClick);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#typeToggleHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
   }
 
   get template() {
-    return createEditPointTemplate(this.#point, this.#pointTypes, this.#destinations);
+    return createEditPointTemplate(this._state, this.#pointTypes, this.#destinations);
   }
 
-  #formSubmitHandler = (evt) => {
+  #handleCloseButtonClick = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(this.#point);
+    this.#handleViewClick();
+  };
+
+  #handleSaveButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#handleFormSubmit(this._state);
+  };
+
+  #typeToggleHandler = (evt) => {
+    evt.preventDefault();
+
+    this.updateElement({
+      type: evt.target.value,
+      offers: [],
+    });
+  };
+
+  #destinationChangeHandler = (evt) => {
+    evt.preventDefault();
+
+    const destination = this.#destinations.find((dest) => dest.name === evt.target.value);
+    if (!destination) {
+      return;
+    }
+
+    this.updateElement({
+      destination: destination.id,
+      destinationEntity: destination,
+    });
+  };
+
+  _restoreHandlers = () => {
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#handleSaveButtonClick);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleCloseButtonClick);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#typeToggleHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
   };
 }
