@@ -16,7 +16,7 @@ function createPointTemplate(point) {
         &mdash;
         <time class="event__end-time" datetime=${dayjs(point.date_to).format(TIME_FORMAT)}>${dayjs(point.date_to).format(TIME_FORMAT)}</time>
       </p>
-      <p class="event__duration">${formatDuration(point.duration)}</p>
+      <p class="event__duration">${formatDuration(dayjs(point.date_to).diff(point.date_from, 'minutes'))}</p>
     </div>
     <p class="event__price">
       &euro;&nbsp;<span class="event__price-value">${point.base_price}</span>
