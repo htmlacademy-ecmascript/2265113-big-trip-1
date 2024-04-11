@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { DATE_FORMAT_FULL } from '../utils/point.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 function createEditPointTemplate(point, pointTypes, destinations) {
   return `<form class="event event--edit" action="#" method="post">
@@ -34,10 +36,10 @@ ${pointTypes.map((pointType) => (
     </div>
     <div class="event__field-group  event__field-group--time">
       <label class="visually-hidden" for="event-start-time-${point.id}">From</label>
-      <input class="event__input  event__input--time" id="event-start-time-${point.id}" type="text" name="event-start-time" value="${dayjs(point.date_from).format(DATE_FORMAT_FULL)}">
+      <input class="event__input  event__input--time start__date" id="event-start-time-${point.id}" type="text" name="event-start-time" value="${dayjs(point.date_from).format(DATE_FORMAT_FULL)}">
       &mdash;
       <label class="visually-hidden" for="event-end-time-${point.id}">To</label>
-      <input class="event__input  event__input--time" id="event-end-time-${point.id}" type="text" name="event-end-time" value="${dayjs(point.date_to).format(DATE_FORMAT_FULL)}">
+      <input class="event__input  event__input--time end__date" id="event-end-time-${point.id}" type="text" name="event-end-time" value="${dayjs(point.date_to).format(DATE_FORMAT_FULL)}">
     </div>
     <div class="event__field-group  event__field-group--price">
       <label class="event__label" for="event-price-${point.id}">
@@ -99,6 +101,8 @@ export default class EditPointView extends AbstractStatefulView {
   #destinations = null;
   #handleFormSubmit = null;
   #handleViewClick = null;
+  #startDatepicker = null;
+  #endDatepicker = null;
 
   constructor({point, pointTypes, destinations, onFormSubmit, onViewClick}) {
     super();
@@ -108,14 +112,63 @@ export default class EditPointView extends AbstractStatefulView {
     this.#handleFormSubmit = onFormSubmit;
     this.#handleViewClick = onViewClick;
 
-    this.element.querySelector('.event__save-btn').addEventListener('click', this.#handleSaveButtonClick);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleCloseButtonClick);
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#typeToggleHandler);
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+    this._restoreHandlers();
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#startDatepicker) {
+      this.#startDatepicker.destroy();
+      this.#startDatepicker = null;
+    }
+
+    if (this.#endDatepicker) {
+      this.#endDatepicker.destroy();
+      this.#endDatepicker = null;
+    }
   }
 
   get template() {
     return createEditPointTemplate(this._state, this.#pointTypes, this.#destinations);
+  }
+
+  #startTimeChangeHandler = ([userDate]) => {
+    this.updateElement({
+      date_from: userDate,
+    });
+  };
+
+  #endTimeChangeHandler = ([userDate]) => {
+    this.updateElement({
+      date_to: userDate,
+    });
+  };
+
+  #setStartDatepicker() {
+    if (this._state.date_from) {
+      this.#startDatepicker = flatpickr(this.element.querySelector('.start__date'),
+        {
+          enableTime: true,
+          dateFormat: 'd/m/Y H:i',
+          defaultDate: this._state.date_from,
+          onChange: this.#startTimeChangeHandler,
+        },
+      );
+    }
+  }
+
+  #setEndDatepicker() {
+    if (this._state.date_to) {
+      this.#endDatepicker = flatpickr(this.element.querySelector('.end__date'),
+        {
+          enableTime: true,
+          dateFormat: 'd/m/Y H:i',
+          defaultDate: this._state.date_to,
+          onChange: this.#endTimeChangeHandler,
+        },
+      );
+    }
   }
 
   #handleCloseButtonClick = (evt) => {
@@ -156,5 +209,8 @@ export default class EditPointView extends AbstractStatefulView {
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleCloseButtonClick);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeToggleHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+
+    this.#setStartDatepicker();
+    this.#setEndDatepicker();
   };
 }
