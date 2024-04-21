@@ -47,7 +47,7 @@ ${pointTypes.map((pointType) => (
         <span class="visually-hidden">Price</span>
         &euro;
       </label>
-      <input class="event__input  event__input--price" id="event-price-${point.id}" type="text" name="event-price" value="${point.base_price}">
+      <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.base_price}">
     </div>
     <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
     <button class="event__reset-btn" type="reset">${point.id ? 'Delete' : 'Cancel'}</button>
