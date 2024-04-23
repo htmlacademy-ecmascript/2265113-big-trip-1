@@ -1,6 +1,9 @@
+import dayjs from 'dayjs';
 import {render, replace, remove} from '../framework/render.js';
 import PointView from '../view/point-view.js';
 import EditPointView from '../view/edit-point-view.js';
+import {UserAction, UpdateType} from '../const.js';
+import { isDatesEqual } from '../utils/point.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -59,6 +62,7 @@ export default class PointPresenter {
       destinations: this.#destinations,
       onFormSubmit: this.#handleFormSubmit,
       onViewClick: this.#handleViewClick,
+      onDeleteClick: this.#handleDeleteClick
     });
 
     replace(this.#pointEditComponent, this.#pointComponent);
@@ -99,12 +103,28 @@ export default class PointPresenter {
 
   #handleFavoriteClick = () => {
     this.#point = {...this.#point, is_favorite: !this.#point.is_favorite};
-    this.#handleDataChange(this.#point);
+    this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, this.#point);
   };
 
-  #handleFormSubmit = (point) => {
-    this.#point = point;
-    this.#handleDataChange(this.#point);
+  #handleFormSubmit = (update) => {
+    const oldDate = dayjs(this.#point.date_to).diff(this.#point.date_from, 'minutes');
+    const newDate = dayjs(update.date_to).diff(update.date_from, 'minutes');
+    const isMinorUpdate = !isDatesEqual(oldDate, newDate);
+    this.#point = update;
+
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+      this.#point
+    );
     this.#replaceFormToCard();
+  };
+
+  #handleDeleteClick = (point) => {
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      point
+    );
   };
 }
