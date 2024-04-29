@@ -287,15 +287,13 @@ export const points = [
   }
 ];
 
-export const getDefaultPoint = [
-  {
-    'id': '',
-    'base_price': 0,
-    'date_from': new Date().toISOString(),
-    'date_to': new Date().toISOString(),
-    'destination': '',
-    'is_favorite': false,
-    'offers': [],
-    'type': 'flight'
-  }
-];
+export const getDefaultPoint = () => ({
+  'id': '',
+  'base_price': 0,
+  'date_from': new Date().toISOString(),
+  'date_to': new Date().toISOString(),
+  'destination': '',
+  'is_favorite': false,
+  'offers': [],
+  'type': 'flight'
+});

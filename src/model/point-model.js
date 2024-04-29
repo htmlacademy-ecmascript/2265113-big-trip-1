@@ -12,7 +12,7 @@ export default class PointsModel extends Observable {
 
   constructor() {
     super();
-    const newPoint = getDefaultPoint;
+    const newPoint = [getDefaultPoint()];
     this.offers = {};
     offers.forEach((offer) => {
       this.offers[offer.type] = offer.offers;
