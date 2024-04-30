@@ -37,17 +37,17 @@ ${pointTypes.map((pointType) => (
     </div>
     <div class="event__field-group  event__field-group--time">
       <label class="visually-hidden" for="event-start-time-${point.id}">From</label>
-      <input class="event__input  event__input--time start__date" id="event-start-time-${point.id}" type="text" name="event-start-time" value="${dayjs(point.date_from).format(DATE_FORMAT_FULL)}">
+      <input class="event__input  event__input--time start__date" id="event-start-time-${point.id}" type="text" name="event-start-time" value="${dayjs(point.dateFrom).format(DATE_FORMAT_FULL)}">
       &mdash;
       <label class="visually-hidden" for="event-end-time-${point.id}">To</label>
-      <input class="event__input  event__input--time end__date" id="event-end-time-${point.id}" type="text" name="event-end-time" value="${dayjs(point.date_to).format(DATE_FORMAT_FULL)}">
+      <input class="event__input  event__input--time end__date" id="event-end-time-${point.id}" type="text" name="event-end-time" value="${dayjs(point.dateTo).format(DATE_FORMAT_FULL)}">
     </div>
     <div class="event__field-group  event__field-group--price">
       <label class="event__label" for="event-price-${point.id}">
         <span class="visually-hidden">Price</span>
         &euro;
       </label>
-      <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.base_price}">
+      <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.price}">
     </div>
     <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
     <button class="event__reset-btn" type="reset">${point.id ? 'Delete' : 'Cancel'}</button>
@@ -138,23 +138,23 @@ export default class EditPointView extends AbstractStatefulView {
 
   #startTimeChangeHandler = ([userDate]) => {
     this.updateElement({
-      date_from: userDate,
+      dateFrom: userDate,
     });
   };
 
   #endTimeChangeHandler = ([userDate]) => {
     this.updateElement({
-      date_to: userDate,
+      dateTo: userDate,
     });
   };
 
   #setStartDatepicker() {
-    if (this._state.date_from) {
+    if (this._state.dateFrom) {
       this.#startDatepicker = flatpickr(this.element.querySelector('.start__date'),
         {
           enableTime: true,
           dateFormat: 'd/m/Y H:i',
-          defaultDate: this._state.date_from,
+          defaultDate: this._state.dateFrom,
           onChange: this.#startTimeChangeHandler,
         },
       );
@@ -162,12 +162,12 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   #setEndDatepicker() {
-    if (this._state.date_to) {
+    if (this._state.dateTo) {
       this.#endDatepicker = flatpickr(this.element.querySelector('.end__date'),
         {
           enableTime: true,
           dateFormat: 'd/m/Y H:i',
-          defaultDate: this._state.date_to,
+          defaultDate: this._state.dateTo,
           onChange: this.#endTimeChangeHandler,
         },
       );

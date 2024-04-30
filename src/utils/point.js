@@ -26,11 +26,11 @@ export const formatDuration = (duration) => {
 };
 
 export function sortByTime(pointA, pointB) {
-  return dayjs(pointB.date_to).diff(pointB.date_from, 'minutes') - dayjs(pointA.date_to).diff(pointA.date_from, 'minutes');
+  return dayjs(pointB.dateTo).diff(pointB.dateFrom, 'minutes') - dayjs(pointA.dateTo).diff(pointA.dateFrom, 'minutes');
 }
 
 export function sortByPrice(pointA, pointB) {
-  return pointB.base_price - pointA.base_price;
+  return pointB.price - pointA.price;
 }
 
 export function isDatesEqual(dateA, dateB) {

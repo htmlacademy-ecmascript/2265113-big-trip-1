@@ -1,7 +1,6 @@
 import FilterPresenter from './filter-presenter.js';
 import SortView from '../view/sort-view.js';
 import {render, RenderPosition, remove} from '../framework/render.js';
-import PointsModel from '../model/point-model.js';
 import NoPointView from '../view/no-point-view.js';
 import PointPresenter from './point-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
@@ -9,6 +8,7 @@ import {SortType, UpdateType, UserAction, FilterType} from '../const.js';
 import {sortByTime, sortByPrice} from '../utils/point.js';
 import FilterModel from '../model/filter-model.js';
 import { filter } from '../utils/filter.js';
+import LoadingView from '../view/loading-view.js';
 
 export default class TripPresenter {
   #filtersContainer = null;
@@ -23,13 +23,15 @@ export default class TripPresenter {
   #currentSortType = SortType.DEFAULT;
   #filterType = FilterType.EVERYTHING;
   #filterModel = null;
+  #isLoading = true;
+  #loadingComponent = new LoadingView();
 
   #tripDestinations = [];
 
-  constructor({filtersContainer, eventsContainer, onNewPointDestroy}) {
+  constructor({filtersContainer, pointsModel, eventsContainer, onNewPointDestroy}) {
     this.#filtersContainer = filtersContainer;
     this.#eventsContainer = eventsContainer;
-    this.#pointsModel = new PointsModel();
+    this.#pointsModel = pointsModel;
     this.#filterModel = new FilterModel();
 
     this.#newPointPresenter = new NewPointPresenter({
@@ -77,6 +79,11 @@ export default class TripPresenter {
 
   #renderTrip() {
     this.#renderSort();
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
 
     this.#renderPoints();
   }
@@ -127,6 +134,12 @@ export default class TripPresenter {
         this.#clearTrip();
         this.#renderTrip({resetSortType: true});
         break;
+      case UpdateType.INIT:
+        this.#clearTrip();
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderTrip();
+        break;
     }
   };
 
@@ -145,6 +158,7 @@ export default class TripPresenter {
 
     remove(this.#sortComponent);
     remove(this.#filtersComponent);
+    remove(this.#loadingComponent);
 
     if (this.#noPointComponent) {
       remove(this.#noPointComponent);
@@ -180,6 +194,10 @@ export default class TripPresenter {
     });
 
     render(this.#noPointComponent, this.#eventsContainer.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
+  }
+
+  #renderLoading() {
+    render(this.#loadingComponent, this.#eventsContainer.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
   }
 
   #renderFilter() {
