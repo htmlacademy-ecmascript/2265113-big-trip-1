@@ -18,24 +18,29 @@ export default class PointPresenter {
   #pointComponent = null;
   #pointEditComponent = null;
 
+  #pointsModel = null;
   #point = null;
   #pointTypes = null;
   #destinations = null;
   #mode = Mode.DEFAULT;
 
-  constructor({eventsContainer, onDataChange, onModeChange}) {
+  constructor({eventsContainer, onDataChange, onModeChange, pointsModel}) {
     this.#eventsContainer = eventsContainer;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
+    this.#pointsModel = pointsModel;
   }
 
-  init(point, pointTypes, destinations) {
+  init(point) {
+    const pointsModel = this.#pointsModel;
     this.#point = point;
-    this.#pointTypes = pointTypes;
-    this.#destinations = destinations;
+    this.#pointTypes = pointsModel.tripPointTypes;
+    this.#destinations = pointsModel.tripDestinations;
 
     this.#pointComponent = new PointView({
       point: this.#point,
+      allOffers: pointsModel.tripOffers,
+      destinationEntity: this.#destinations.find((dest) => dest.id === point.destination),
       onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick,
     });
@@ -58,6 +63,8 @@ export default class PointPresenter {
 
     this.#pointEditComponent = new EditPointView({
       point: this.#point,
+      allOffers:  this.#pointsModel.tripOffers,
+      destinationEntity: this.#destinations.find((dest) => dest.id === this.#point.destination),
       pointTypes: this.#pointTypes,
       destinations: this.#destinations,
       onFormSubmit: this.#handleFormSubmit,
@@ -77,6 +84,8 @@ export default class PointPresenter {
 
     this.#pointComponent = new PointView({
       point: this.#point,
+      allOffers:  this.#pointsModel.tripOffers,
+      destinationEntity: this.#destinations.find((dest) => dest.id === this.#point.destination),
       onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick,
     });
@@ -102,13 +111,13 @@ export default class PointPresenter {
   };
 
   #handleFavoriteClick = () => {
-    this.#point = {...this.#point, is_favorite: !this.#point.is_favorite};
+    this.#point = {...this.#point, isFavorite: !this.#point.isFavorite};
     this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, this.#point);
   };
 
   #handleFormSubmit = (update) => {
-    const oldDate = dayjs(this.#point.date_to).diff(this.#point.date_from, 'minutes');
-    const newDate = dayjs(update.date_to).diff(update.date_from, 'minutes');
+    const oldDate = dayjs(this.#point.dateTo).diff(this.#point.dateFrom, 'minutes');
+    const newDate = dayjs(update.dateTo).diff(update.dateFrom, 'minutes');
     const isMinorUpdate = !isDatesEqual(oldDate, newDate);
     this.#point = update;
 

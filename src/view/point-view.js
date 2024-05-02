@@ -2,28 +2,28 @@ import dayjs from 'dayjs';
 import AbstractView from '../framework/view/abstract-view.js';
 import { DATE_FORMAT, TIME_FORMAT, formatDuration } from '../utils/point.js';
 
-function createPointTemplate(point) {
+function createPointTemplate(point, allOffers, destinationEntity) {
   return `<li class="trip-events__item">
   <div class="event">
     <time class="event__date" datetime=${dayjs(point.dateFrom, 'full-date').format(DATE_FORMAT)}>${dayjs(point.dateFrom, 'custom').format(DATE_FORMAT)}</time>
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${point.type.toLowerCase()}.png" alt="Event type icon">
     </div>
-    <h3 class="event__title">${point.type} ${point.destinationEntity.name}</h3>
+    <h3 class="event__title">${point.type} ${destinationEntity.name}</h3>
     <div class="event__schedule">
       <p class="event__time">
         <time class="event__start-time" datetime=${dayjs(point.dateFrom).format(TIME_FORMAT)}>${dayjs(point.dateFrom).format(TIME_FORMAT)}</time>
         &mdash;
         <time class="event__end-time" datetime=${dayjs(point.dateTo).format(TIME_FORMAT)}>${dayjs(point.dateTo).format(TIME_FORMAT)}</time>
       </p>
-      <p class="event__duration">${formatDuration(dayjs(point.dateTo).diff(point.dateFrom, 'minutes'))}</p>
+      <p class="event__duration">${formatDuration(point.duration)}</p>
     </div>
     <p class="event__price">
       &euro;&nbsp;<span class="event__price-value">${point.price}</span>
     </p>
     <h4 class="visually-hidden">Offers:</h4>
     <ul class="event__selected-offers">
-  ${point.allOffers[point.type].map((offer) => (
+  ${allOffers[point.type].map((offer) => (
     `${point.offers.includes(offer.id) ?
       `<li class="event__offer">
         <span class="event__offer-title">${offer.title}</span>
@@ -47,12 +47,16 @@ function createPointTemplate(point) {
 
 export default class PointView extends AbstractView {
   #point = null;
+  #destinationEntity = null;
+  #allOffers = null;
   #handleEditClick = null;
   #handleFavoriteClick = null;
 
-  constructor({point, onEditClick, onFavoriteClick}) {
+  constructor({point, allOffers, destinationEntity, onEditClick, onFavoriteClick}) {
     super();
     this.#point = point;
+    this.#allOffers = allOffers;
+    this.#destinationEntity = destinationEntity;
     this.#handleEditClick = onEditClick;
     this.#handleFavoriteClick = onFavoriteClick;
 
@@ -61,7 +65,7 @@ export default class PointView extends AbstractView {
   }
 
   get template() {
-    return createPointTemplate(this.#point);
+    return createPointTemplate(this.#point, this.#allOffers, this.#destinationEntity);
   }
 
   #editClickHandler = (evt) => {

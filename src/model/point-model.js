@@ -1,4 +1,3 @@
-import { getDefaultPoint } from '../mock/point.js';
 import dayjs from 'dayjs';
 import Observable from '../framework/observable.js';
 import { UpdateType } from '../const.js';
@@ -8,7 +7,6 @@ export default class PointsModel extends Observable {
   #points = [];
   #pointTypes = [];
   #destinations = [];
-  #defaultPoint = {};
 
   constructor({pointsApiService}) {
     super();
@@ -20,7 +18,17 @@ export default class PointsModel extends Observable {
   }
 
   get defaultPoint() {
-    return this.#defaultPoint;
+    return [{
+      id: '',
+      price: 0,
+      dateFrom: new Date().toISOString(),
+      dateTo: new Date().toISOString(),
+      destination: '',
+      duration: 0,
+      isFavorite: false,
+      offers: [],
+      type: 'taxi'
+    }];
   }
 
   get tripPointTypes() {
@@ -40,6 +48,7 @@ export default class PointsModel extends Observable {
       const points = await this.#pointsApiService.points;
       const destinations = await this.#pointsApiService.destinations;
       const offers = await this.#pointsApiService.offers;
+
       this.offers = {};
       offers.forEach((offer) => {
         this.offers[offer.type] = offer.offers;
@@ -47,18 +56,7 @@ export default class PointsModel extends Observable {
       this.#pointTypes = Object.keys(this.offers);
       this.#destinations = destinations;
       this.#points = points.map(this.#adaptToClient);
-      this.#points = this.#points.map((point) => ({
-        ...point,
-        allOffers: this.offers,
-        duration: dayjs(point.dateTo).diff(point.dateFrom, 'minutes'),
-        destinationEntity: this.#destinations.find((dest) => dest.id === point.destination),
-      }));
-      const newPoint = [getDefaultPoint()];
-      this.#defaultPoint = newPoint.map((point) => ({
-        ...point,
-        allOffers: this.offers,
-        duration: dayjs(point.dateTo).diff(point.dateFrom, 'minutes'),
-      }));
+
     } catch(err) {
       this.#points = [];
     }
@@ -76,17 +74,13 @@ export default class PointsModel extends Observable {
     try {
       const response = await this.#pointsApiService.updatePoint(update);
       const updatedPoint = this.#adaptToClient(response);
-      this.updatedPoint = {...updatedPoint,
-        allOffers: this.offers,
-        duration: dayjs(updatedPoint.dateTo).diff(updatedPoint.dateFrom, 'minutes'),
-        destinationEntity: this.#destinations.find((dest) => dest.id === updatedPoint.destination)
-      };
+
       this.#points = [
         ...this.#points.slice(0, index),
         update,
         ...this.#points.slice(index + 1),
       ];
-      this._notify(updateType, this.updatedPoint);
+      this._notify(updateType, updatedPoint);
     } catch(err) {
       throw new Error('Can\'t update task');
     }
@@ -116,18 +110,15 @@ export default class PointsModel extends Observable {
     this._notify(updateType);
   }
 
-  #adaptToClient(point) {
-    const adaptedPoint = {...point,
-      price: point['base_price'],
-      dateFrom: point['date_from'] !== null ? new Date(point['date_from']) : point['date_from'],
-      dateTo: point['date_to'] !== null ? new Date(point['date_to']) : point['date_to'],
-      isFavorite: point['is_favorite']
-    };
-    delete adaptedPoint['base_price'];
-    delete adaptedPoint['date_from'];
-    delete adaptedPoint['date_to'];
-    delete adaptedPoint['is_favorite'];
-
-    return adaptedPoint;
-  }
+  #adaptToClient = (point) => ({
+    price: point['base_price'],
+    dateFrom: point['date_from'] !== null ? new Date(point['date_from']) : point['date_from'],
+    dateTo: point['date_to'] !== null ? new Date(point['date_to']) : point['date_to'],
+    destination: point.destination,
+    duration: dayjs(point['date_to']).diff(point['date_from'], 'minutes'),
+    id: point.id,
+    isFavorite: point['is_favorite'],
+    offers: point.offers,
+    type: point.type,
+  });
 }

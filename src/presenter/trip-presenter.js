@@ -37,7 +37,8 @@ export default class TripPresenter {
     this.#newPointPresenter = new NewPointPresenter({
       pointListContainer: eventsContainer,
       onDataChange: this.#handleViewAction,
-      onDestroy: onNewPointDestroy
+      onDestroy: onNewPointDestroy,
+      pointsModel: this.#pointsModel
     });
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
@@ -46,7 +47,7 @@ export default class TripPresenter {
 
   get tripPoints() {
     this.#filterType = this.#filterModel.filter;
-    const points = this.#pointsModel.tripPoints;
+    const points = [...this.#pointsModel.tripPoints];
     const filteredPoints = filter[this.#filterType](points);
 
     switch (this.#currentSortType) {
@@ -66,14 +67,15 @@ export default class TripPresenter {
     this.#renderTrip();
   }
 
-  #renderPoint(point, pointTypes, destinations) {
+  #renderPoint(point, pointsModel) {
     const pointPresenter = new PointPresenter({
       eventsContainer: this.#eventsContainer.querySelector('.trip-events__list'),
       onDataChange: this.#handleViewAction,
-      onModeChange: this.#handleModeChange
+      onModeChange: this.#handleModeChange,
+      pointsModel: pointsModel
     });
 
-    pointPresenter.init(point, pointTypes, destinations);
+    pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
@@ -89,22 +91,22 @@ export default class TripPresenter {
   }
 
   #renderPoints() {
-    if (this.tripPoints.length < 1) {
+    const points = this.tripPoints;
+
+    if (points.length < 1) {
       this.#renderNoPoint();
       return;
     }
 
     for (let i = 0; i < this.tripPoints.length; i++) {
-      this.#renderPoint(this.tripPoints[i], this.#pointsModel.tripPointTypes, this.#tripDestinations);
+      this.#renderPoint(points[i], this.#pointsModel);
     }
   }
 
   createPoint() {
-    const newPoint = this.#pointsModel.defaultPoint[0];
-
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-    this.#newPointPresenter.init(newPoint, this.#pointsModel.tripPointTypes, this.#tripDestinations);
+    this.#newPointPresenter.init();
   }
 
   #handleViewAction = (actionType, updateType, update) => {

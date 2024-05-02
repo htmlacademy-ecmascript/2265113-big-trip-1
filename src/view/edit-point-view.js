@@ -5,7 +5,7 @@ import { DATE_FORMAT_FULL } from '../utils/point.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-function createEditPointTemplate(point, pointTypes, destinations) {
+function createEditPointTemplate(point, allOffers, destinationEntity, pointTypes, destinations) {
   return `<form class="event event--edit" action="#" method="post">
   <header class="event__header">
     <div class="event__type-wrapper">
@@ -30,7 +30,7 @@ ${pointTypes.map((pointType) => (
       <label class="event__label  event__type-output" for="event-destination-${point.id}">
       ${point.type}
       </label>
-      <input class="event__input  event__input--destination" id="event-destination-${point.id}" type="text" name="event-destination" value="${point.destinationEntity ? he.encode(point.destinationEntity.name) : he.encode('')}" list="destination-list-${point.id}">
+      <input class="event__input  event__input--destination" id="event-destination-${point.id}" type="text" name="event-destination" value="${destinationEntity ? he.encode(destinationEntity.name) : he.encode('')}" list="destination-list-${point.id}">
       <datalist id="destination-list-${point.id}">
         ${destinations.map((dest) =>`<option value="${dest.name}"></option>`).join('')}
       </datalist>
@@ -58,11 +58,11 @@ ${pointTypes.map((pointType) => (
   ) : ''}
   </header>
   <section class="event__details">
-    ${point.allOffers[point.type].length ?
+    ${allOffers[point.type].length ?
     `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${point.allOffers[point.type].map((offer) => (
+        ${allOffers[point.type].map((offer) => (
     `<div class="event__offer-selector">
           <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${point.id}" type="checkbox" name="event-offer-${offer.title}"
 ${point.offers.includes(offer.id) ? 'checked' : ''}>
@@ -80,12 +80,12 @@ ${point.offers.includes(offer.id) ? 'checked' : ''}>
     ${point.destination ? (
     `<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-      <p class="event__destination-description">${point.destinationEntity.description}</p>
+      <p class="event__destination-description">${destinationEntity.description}</p>
 
-      ${point.destinationEntity.pictures.length > 0 ? (
+      ${destinationEntity.pictures.length > 0 ? (
       `<div class="event__photos-container">
         <div class="event__photos-tape">
-          ${point.destinationEntity.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
+          ${destinationEntity.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
       </div>
     </div>`
     ) : ''}
@@ -98,17 +98,21 @@ ${point.offers.includes(offer.id) ? 'checked' : ''}>
 }
 
 export default class EditPointView extends AbstractStatefulView {
+  #allOffers = null;
   #pointTypes = null;
   #destinations = null;
+  #destinationEntity = null;
   #handleFormSubmit = null;
   #handleViewClick = null;
   #startDatepicker = null;
   #endDatepicker = null;
   #handleDeleteClick = null;
 
-  constructor({point, pointTypes, destinations, onFormSubmit, onViewClick, onDeleteClick}) {
+  constructor({point, allOffers, destinationEntity, pointTypes, destinations, onFormSubmit, onViewClick, onDeleteClick}) {
     super();
     this._setState(point);
+    this.#allOffers = allOffers;
+    this.#destinationEntity = destinationEntity;
     this.#pointTypes = pointTypes;
     this.#destinations = destinations;
     this.#handleFormSubmit = onFormSubmit;
@@ -133,7 +137,7 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   get template() {
-    return createEditPointTemplate(this._state, this.#pointTypes, this.#destinations);
+    return createEditPointTemplate(this._state, this.#allOffers, this.#destinationEntity, this.#pointTypes, this.#destinations);
   }
 
   #startTimeChangeHandler = ([userDate]) => {
@@ -197,13 +201,13 @@ export default class EditPointView extends AbstractStatefulView {
     evt.preventDefault();
 
     const destination = this.#destinations.find((dest) => dest.name === evt.target.value);
+
     if (!destination) {
       return;
     }
 
     this.updateElement({
-      destination: destination.id,
-      destinationEntity: destination,
+      destination: destination.id
     });
   };
 
