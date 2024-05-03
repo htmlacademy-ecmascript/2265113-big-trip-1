@@ -11,24 +11,29 @@ export default class NewPointPresenter {
   #pointTypes = null;
   #destinations = null;
 
+  #pointsModel = null;
   #pointEditComponent = null;
 
-  constructor({pointListContainer, onDataChange, onDestroy}) {
+  constructor({pointListContainer, onDataChange, onDestroy, pointsModel}) {
     this.#pointListContainer = pointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
+    this.#pointsModel = pointsModel;
   }
 
-  init(point, pointTypes, destinations) {
-    this.#point = point;
-    this.#pointTypes = pointTypes;
-    this.#destinations = destinations;
+  init() {
+    this.#point = this.#pointsModel.defaultPoint[0];
+    this.#pointTypes = this.#pointsModel.tripPointTypes;
+    this.#destinations = this.#pointsModel.tripDestinations;
+
     if (this.#pointEditComponent !== null) {
       return;
     }
 
     this.#pointEditComponent = new EditPointView({
       point: this.#point,
+      allOffers:  this.#pointsModel.tripOffers,
+      destinationEntity: this.#destinations.find((dest) => dest.id === this.#point.destination),
       pointTypes: this.#pointTypes,
       destinations: this.#destinations,
       onFormSubmit: this.#handleFormSubmit,
