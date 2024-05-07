@@ -18,7 +18,7 @@ export default class PointsModel extends Observable {
   }
 
   get defaultPoint() {
-    return [{
+    return {
       id: '',
       price: 0,
       dateFrom: new Date().toISOString(),
@@ -28,7 +28,7 @@ export default class PointsModel extends Observable {
       isFavorite: false,
       offers: [],
       type: 'taxi'
-    }];
+    };
   }
 
   get tripPointTypes() {

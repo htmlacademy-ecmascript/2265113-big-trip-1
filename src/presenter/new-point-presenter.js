@@ -22,7 +22,7 @@ export default class NewPointPresenter {
   }
 
   init() {
-    this.#point = this.#pointsModel.defaultPoint[0];
+    this.#point = this.#pointsModel.defaultPoint;
     this.#pointTypes = this.#pointsModel.tripPointTypes;
     this.#destinations = this.#pointsModel.tripDestinations;
 
