@@ -6,6 +6,8 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
 function createEditPointTemplate(point, allOffers, destinationEntity, pointTypes, destinations) {
+  const isDeleting = point.isDeleting ? 'Deleting...' : 'Delete';
+
   return `<form class="event event--edit" action="#" method="post">
   <header class="event__header">
     <div class="event__type-wrapper">
@@ -19,7 +21,7 @@ function createEditPointTemplate(point, allOffers, destinationEntity, pointTypes
           <legend class="visually-hidden">Event type</legend>
 ${pointTypes.map((pointType) => (
     `<div class="event__type-item">
-      <input id="event-type-${pointType}-${point.id}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${pointType}" ${pointType === point.type ? 'checked' : ''}>
+      <input id="event-type-${pointType}-${point.id}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${pointType}" ${pointType === point.type ? 'checked' : ''} ${point.isDisabled ? 'disabled' : ''}>
       <label class="event__type-label  event__type-label--${pointType}" for="event-type-${pointType}-${point.id}">${pointType}</label>
   </div>`
   )).join('')}
@@ -30,29 +32,29 @@ ${pointTypes.map((pointType) => (
       <label class="event__label  event__type-output" for="event-destination-${point.id}">
       ${point.type}
       </label>
-      <input class="event__input  event__input--destination" id="event-destination-${point.id}" type="text" name="event-destination" value="${destinationEntity ? he.encode(destinationEntity.name) : he.encode('')}" list="destination-list-${point.id}">
+      <input class="event__input  event__input--destination" id="event-destination-${point.id}" type="text" name="event-destination" value="${destinationEntity ? he.encode(destinationEntity.name) : he.encode('')}" list="destination-list-${point.id}" ${point.isDisabled ? 'disabled' : ''}>
       <datalist id="destination-list-${point.id}">
         ${destinations.map((dest) =>`<option value="${dest.name}"></option>`).join('')}
       </datalist>
     </div>
     <div class="event__field-group  event__field-group--time">
       <label class="visually-hidden" for="event-start-time-${point.id}">From</label>
-      <input class="event__input  event__input--time start__date" id="event-start-time-${point.id}" type="text" name="event-start-time" value="${dayjs(point.dateFrom).format(DATE_FORMAT_FULL)}">
+      <input class="event__input  event__input--time start__date" id="event-start-time-${point.id}" type="text" name="event-start-time" value="${dayjs(point.dateFrom).format(DATE_FORMAT_FULL)}" ${point.isDisabled ? 'disabled' : ''}>
       &mdash;
       <label class="visually-hidden" for="event-end-time-${point.id}">To</label>
-      <input class="event__input  event__input--time end__date" id="event-end-time-${point.id}" type="text" name="event-end-time" value="${dayjs(point.dateTo).format(DATE_FORMAT_FULL)}">
+      <input class="event__input  event__input--time end__date" id="event-end-time-${point.id}" type="text" name="event-end-time" value="${dayjs(point.dateTo).format(DATE_FORMAT_FULL)}" ${point.isDisabled ? 'disabled' : ''}>
     </div>
     <div class="event__field-group  event__field-group--price">
       <label class="event__label" for="event-price-${point.id}">
         <span class="visually-hidden">Price</span>
         &euro;
       </label>
-      <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.price}">
+      <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.price}" ${point.isDisabled ? 'disabled' : ''}>
     </div>
-    <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-    <button class="event__reset-btn" type="reset">${point.id ? 'Delete' : 'Cancel'}</button>
+    <button class="event__save-btn  btn  btn--blue" type="submit">${point.isSaving ? 'Saving...' : 'Save'}</button>
+    <button class="event__reset-btn" type="reset">${point.id ? isDeleting : 'Cancel'}</button>
     ${point.id ? (
-    `<button class="event__rollup-btn" type="button">
+    `<button class="event__rollup-btn" type="button" ${point.isDisabled ? 'disabled' : ''}>
         <span class="visually-hidden">Open event</span>
       </button>`
   ) : ''}
@@ -65,7 +67,7 @@ ${pointTypes.map((pointType) => (
         ${allOffers[point.type].map((offer) => (
     `<div class="event__offer-selector">
           <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${point.id}" type="checkbox" name="event-offer-${offer.title}"
-${point.offers.includes(offer.id) ? 'checked' : ''}>
+${point.offers.includes(offer.id) ? 'checked' : ''} ${point.isDisabled ? 'disabled' : ''}>
           <label class="event__offer-label" for="event-offer-${offer.title}-${point.id}">
             <span class="event__offer-title">${offer.title}</span>
             &plus;&euro;&nbsp;
@@ -206,6 +208,7 @@ export default class EditPointView extends AbstractStatefulView {
       return;
     }
 
+    this.#destinationEntity = this.#destinations.find((dest) => dest.id === destination.id);
     this.updateElement({
       destination: destination.id
     });
