@@ -127,6 +127,7 @@ export default class TripPresenter {
         this.#pointPresenters.get(update.id).setSaving();
         try {
           await this.#pointsModel.updatePoint(updateType, update);
+          this.#pointPresenters.get(update.id).resetView();
         } catch(err) {
           this.#pointPresenters.get(update.id).setAborting();
         }
@@ -187,6 +188,8 @@ export default class TripPresenter {
   #clearTrip({resetSortType = false} = {}) {
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
+
+    this.#activePoint = null;
 
     remove(this.#sortComponent);
     remove(this.#filtersComponent);

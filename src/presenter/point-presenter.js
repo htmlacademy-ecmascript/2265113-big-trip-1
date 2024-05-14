@@ -4,6 +4,7 @@ import PointView from '../view/point-view.js';
 import EditPointView from '../view/edit-point-view.js';
 import {UserAction, UpdateType} from '../const.js';
 import { isDatesEqual } from '../utils/point.js';
+import { ESC_KEY_CODE } from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -131,7 +132,7 @@ export default class PointPresenter {
   }
 
   #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape') {
+    if (evt.key === ESC_KEY_CODE) {
       evt.preventDefault();
       this.#replaceFormToCard();
     }
