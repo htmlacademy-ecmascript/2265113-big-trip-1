@@ -18,17 +18,19 @@ export default class PointsModel extends Observable {
   }
 
   get defaultPoint() {
-    return [{
-      id: '',
-      price: 0,
+    return {
+      price: 100,
       dateFrom: new Date().toISOString(),
       dateTo: new Date().toISOString(),
       destination: '',
       duration: 0,
       isFavorite: false,
       offers: [],
-      type: 'taxi'
-    }];
+      type: 'taxi',
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false,
+    };
   }
 
   get tripPointTypes() {
@@ -82,32 +84,39 @@ export default class PointsModel extends Observable {
       ];
       this._notify(updateType, updatedPoint);
     } catch(err) {
-      throw new Error('Can\'t update task');
+      throw new Error('Can\'t update point');
     }
   }
 
-  addPoint(updateType, update) {
-    this.#points = [
-      update,
-      ...this.#points,
-    ];
+  async addPoint(updateType, update) {
+    try {
+      const response = await this.#pointsApiService.addPoint(update);
+      const newPoint = this.#adaptToClient(response);
 
-    this._notify(updateType, update);
+      this.#points = [newPoint, ...this.#points];
+      this._notify(updateType, newPoint);
+    } catch(err) {
+      throw new Error('Can\'t add point');
+    }
   }
 
-  deletePoint(updateType, update) {
+  async deletePoint(updateType, update) {
     const index = this.#points.findIndex((point) => point.id === update.id);
 
     if (index === -1) {
       throw new Error('Can\'t delete unexisting point');
     }
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      ...this.#points.slice(index + 1),
-    ];
-
-    this._notify(updateType);
+    try {
+      await this.#pointsApiService.deletePoint(update);
+      this.#points = [
+        ...this.#points.slice(0, index),
+        ...this.#points.slice(index + 1),
+      ];
+      this._notify(updateType);
+    } catch(err) {
+      throw new Error('Can\'t delete point');
+    }
   }
 
   #adaptToClient = (point) => ({
@@ -120,5 +129,8 @@ export default class PointsModel extends Observable {
     isFavorite: point['is_favorite'],
     offers: point.offers,
     type: point.type,
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
   });
 }

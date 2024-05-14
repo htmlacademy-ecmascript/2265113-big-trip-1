@@ -4,6 +4,7 @@ import PointView from '../view/point-view.js';
 import EditPointView from '../view/edit-point-view.js';
 import {UserAction, UpdateType} from '../const.js';
 import { isDatesEqual } from '../utils/point.js';
+import { ESC_KEY_CODE } from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -95,8 +96,43 @@ export default class PointPresenter {
     this.#mode = Mode.DEFAULT;
   }
 
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  }
+
   #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape') {
+    if (evt.key === ESC_KEY_CODE) {
       evt.preventDefault();
       this.#replaceFormToCard();
     }
@@ -126,7 +162,7 @@ export default class PointPresenter {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       this.#point
     );
-    this.#replaceFormToCard();
+    //this.#replaceFormToCard();
   };
 
   #handleDeleteClick = (point) => {
