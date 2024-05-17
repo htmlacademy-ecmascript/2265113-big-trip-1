@@ -1,3 +1,5 @@
+export const DESTINATIONS_ITEMS_LENGTH = 3;
+
 export const FilterType = {
   EVERYTHING: 'everything',
   FUTURE: 'future',

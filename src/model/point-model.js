@@ -7,6 +7,7 @@ export default class PointsModel extends Observable {
   #points = [];
   #pointTypes = [];
   #destinations = [];
+  #baseOffers = null;
 
   constructor({pointsApiService}) {
     super();
@@ -45,12 +46,18 @@ export default class PointsModel extends Observable {
     return this.#destinations;
   }
 
+  getByType(type) {
+    return this.#baseOffers.find((offer) => offer.type === type).offers;
+  }
+
   async init() {
     try {
       const points = await this.#pointsApiService.points;
       const destinations = await this.#pointsApiService.destinations;
       const offers = await this.#pointsApiService.offers;
+      const baseOffers = [...offers];
 
+      this.#baseOffers = baseOffers;
       this.offers = {};
       offers.forEach((offer) => {
         this.offers[offer.type] = offer.offers;
