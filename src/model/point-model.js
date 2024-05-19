@@ -7,20 +7,20 @@ export default class PointsModel extends Observable {
   #points = [];
   #pointTypes = [];
   #destinations = [];
-  #baseOffers = null;
+  #offers = null;
 
-  constructor({pointsApiService}) {
+  constructor(pointsApiService) {
     super();
     this.#pointsApiService = pointsApiService;
   }
 
   get tripPoints() {
-    return this.#points;
+    return [...this.#points];
   }
 
   get defaultPoint() {
     return {
-      price: 100,
+      price: 0,
       dateFrom: new Date().toISOString(),
       dateTo: new Date().toISOString(),
       destination: '',
@@ -39,15 +39,11 @@ export default class PointsModel extends Observable {
   }
 
   get tripOffers() {
-    return this.offers;
+    return this.#offers;
   }
 
   get tripDestinations() {
     return this.#destinations;
-  }
-
-  getByType(type) {
-    return this.#baseOffers.find((offer) => offer.type === type).offers;
   }
 
   async init() {
@@ -55,14 +51,11 @@ export default class PointsModel extends Observable {
       const points = await this.#pointsApiService.points;
       const destinations = await this.#pointsApiService.destinations;
       const offers = await this.#pointsApiService.offers;
-      const baseOffers = [...offers];
-
-      this.#baseOffers = baseOffers;
-      this.offers = {};
+      this.#offers = {};
       offers.forEach((offer) => {
-        this.offers[offer.type] = offer.offers;
+        this.#offers[offer.type] = offer.offers;
       });
-      this.#pointTypes = Object.keys(this.offers);
+      this.#pointTypes = Object.keys(this.#offers);
       this.#destinations = destinations;
       this.#points = points.map(this.#adaptToClient);
 

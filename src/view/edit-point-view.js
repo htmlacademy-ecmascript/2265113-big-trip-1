@@ -216,13 +216,10 @@ export default class EditPointView extends AbstractStatefulView {
 
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
-
     const newPrice = parseInt(evt.target.value, 10);
-
     if (!newPrice || newPrice < 0) {
       return;
     }
-
     this.updateElement({
       price: newPrice
     });
@@ -230,10 +227,8 @@ export default class EditPointView extends AbstractStatefulView {
 
   #offerChangeHandler = (evt) => {
     evt.preventDefault();
-
     const selectedOffers = [...this._state.offers];
     const offerId = evt.target.dataset.offerId;
-
 
     if (evt.target.checked) {
       selectedOffers.push(offerId);

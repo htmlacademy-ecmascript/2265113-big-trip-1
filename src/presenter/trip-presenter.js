@@ -5,7 +5,7 @@ import NoPointView from '../view/no-point-view.js';
 import PointPresenter from './point-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
 import {SortType, UpdateType, UserAction, FilterType} from '../const.js';
-import {sortByTime, sortByPrice} from '../utils/point.js';
+import {sortByDurationTime, sortByPrice} from '../utils/point.js';
 import FilterModel from '../model/filter-model.js';
 import { filter } from '../utils/filter.js';
 import LoadingView from '../view/loading-view.js';
@@ -38,14 +38,14 @@ export default class TripPresenter {
 
   #tripDestinations = [];
 
-  constructor({filtersContainer, pointsModel, eventsContainer, onNewPointDestroy}) {
-    this.#filtersContainer = filtersContainer;
-    this.#eventsContainer = eventsContainer;
+  constructor({filtersElement, pointsModel, eventsElement, onNewPointDestroy}) {
+    this.#filtersContainer = filtersElement;
+    this.#eventsContainer = eventsElement;
     this.#pointsModel = pointsModel;
     this.#filterModel = new FilterModel();
 
     this.#newPointPresenter = new NewPointPresenter({
-      pointListContainer: eventsContainer,
+      pointListContainer: eventsElement,
       onDataChange: this.#handleViewAction,
       onDestroy: onNewPointDestroy,
       pointsModel: this.#pointsModel
@@ -62,7 +62,7 @@ export default class TripPresenter {
 
     switch (this.#currentSortType) {
       case SortType.TIME:
-        return filteredPoints.sort(sortByTime);
+        return filteredPoints.sort(sortByDurationTime);
       case SortType.PRICE:
         return filteredPoints.sort(sortByPrice);
     }

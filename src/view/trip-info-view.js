@@ -1,10 +1,6 @@
 import AbstractView from '../framework/view/abstract-view';
 
-function createTripInfoTemplate({ isEmpty, title, duration, cost }) {
-  if (isEmpty) {
-    return '<div></div>';
-  }
-
+function createTripInfoTemplate({ title, duration, cost }) {
   return (
     `<section class="trip-main__trip-info  trip-info">
       <div class="trip-info__main">
@@ -21,15 +17,12 @@ function createTripInfoTemplate({ isEmpty, title, duration, cost }) {
 }
 
 export default class TripInfoView extends AbstractView {
-  #isEmpty = null;
   #title = null;
   #duration = null;
   #cost = null;
 
-  constructor({isEmpty, title = '', duration = '', cost = ''}) {
+  constructor(title = '', duration = '', cost = '') {
     super();
-
-    this.#isEmpty = isEmpty;
     this.#title = title;
     this.#duration = duration;
     this.#cost = cost;
@@ -37,7 +30,6 @@ export default class TripInfoView extends AbstractView {
 
   get template() {
     return createTripInfoTemplate({
-      isEmpty: this.#isEmpty,
       title: this.#title,
       duration: this.#duration,
       cost: this.#cost

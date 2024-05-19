@@ -1,4 +1,6 @@
-export const DESTINATIONS_ITEMS_LENGTH = 3;
+export const DESTINATIONS_ITEMS_COUNT = 3;
+export const MOCK_AUTHORIZATION = 'Basic il5z873jh48751d';
+export const BACKEND_API_URL = 'https://20.objects.htmlacademy.pro/big-trip';
 
 export const FilterType = {
   EVERYTHING: 'everything',
