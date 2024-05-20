@@ -100,15 +100,17 @@ ${point.offers.includes(offer.id) ? 'checked' : ''} ${point.isDisabled ? 'disabl
 }
 
 export default class EditPointView extends AbstractStatefulView {
+  #handleFormSubmit = null;
+  #handleViewClick = null;
+  #handleDeleteClick = null;
+
   #allOffers = null;
   #pointTypes = null;
   #destinations = null;
   #destinationEntity = null;
-  #handleFormSubmit = null;
-  #handleViewClick = null;
+
   #startDatepicker = null;
   #endDatepicker = null;
-  #handleDeleteClick = null;
 
   constructor({point, allOffers, destinationEntity, pointTypes, destinations, onFormSubmit, onViewClick, onDeleteClick}) {
     super();

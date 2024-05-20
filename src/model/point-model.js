@@ -4,6 +4,7 @@ import { UpdateType } from '../const.js';
 
 export default class PointsModel extends Observable {
   #pointsApiService = null;
+
   #points = [];
   #pointTypes = [];
   #destinations = [];
@@ -51,6 +52,7 @@ export default class PointsModel extends Observable {
       const points = await this.#pointsApiService.points;
       const destinations = await this.#pointsApiService.destinations;
       const offers = await this.#pointsApiService.offers;
+
       this.#offers = {};
       offers.forEach((offer) => {
         this.#offers[offer.type] = offer.offers;

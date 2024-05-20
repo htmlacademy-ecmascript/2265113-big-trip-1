@@ -12,21 +12,23 @@ const Mode = {
 };
 
 export default class PointPresenter {
-  #eventsContainer = null;
+  #eventsElement = null;
+
+  #pointsModel = null;
+
   #handleDataChange = null;
   #handleModeChange = null;
 
   #pointComponent = null;
   #pointEditComponent = null;
 
-  #pointsModel = null;
   #point = null;
   #pointTypes = null;
   #destinations = null;
   #mode = Mode.DEFAULT;
 
-  constructor({eventsContainer, onDataChange, onModeChange, pointsModel}) {
-    this.#eventsContainer = eventsContainer;
+  constructor({eventsElement, onDataChange, onModeChange, pointsModel}) {
+    this.#eventsElement = eventsElement;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
     this.#pointsModel = pointsModel;
@@ -41,11 +43,11 @@ export default class PointPresenter {
     this.#pointComponent = new PointView({
       point: this.#point,
       allOffers: pointsModel.tripOffers,
-      destinationEntity: this.#destinations.find((dest) => dest.id === point.destination),
+      destinationEntity: this.#getDestinationEntity(),
       onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick,
     });
-    render(this.#pointComponent, this.#eventsContainer);
+    render(this.#pointComponent, this.#eventsElement);
   }
 
   destroy() {
@@ -59,13 +61,15 @@ export default class PointPresenter {
     }
   }
 
+  #getDestinationEntity = () => this.#destinations.find((dest) => dest.id === this.#point.destination);
+
   #replaceCardToForm() {
     remove(this.#pointEditComponent);
 
     this.#pointEditComponent = new EditPointView({
       point: this.#point,
       allOffers:  this.#pointsModel.tripOffers,
-      destinationEntity: this.#destinations.find((dest) => dest.id === this.#point.destination),
+      destinationEntity: this.#getDestinationEntity(),
       pointTypes: this.#pointTypes,
       destinations: this.#destinations,
       onFormSubmit: this.#handleFormSubmit,
@@ -86,7 +90,7 @@ export default class PointPresenter {
     this.#pointComponent = new PointView({
       point: this.#point,
       allOffers:  this.#pointsModel.tripOffers,
-      destinationEntity: this.#destinations.find((dest) => dest.id === this.#point.destination),
+      destinationEntity: this.#getDestinationEntity(),
       onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick,
     });
@@ -162,7 +166,6 @@ export default class PointPresenter {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       this.#point
     );
-    //this.#replaceFormToCard();
   };
 
   #handleDeleteClick = (point) => {

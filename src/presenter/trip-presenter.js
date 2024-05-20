@@ -5,7 +5,7 @@ import NoPointView from '../view/no-point-view.js';
 import PointPresenter from './point-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
 import {SortType, UpdateType, UserAction, FilterType} from '../const.js';
-import {sortByDurationTime, sortByPrice} from '../utils/point.js';
+import {sortByDurationTime, sortByPrice, sortByStartDate} from '../utils/point.js';
 import FilterModel from '../model/filter-model.js';
 import { filter } from '../utils/filter.js';
 import LoadingView from '../view/loading-view.js';
@@ -17,35 +17,39 @@ const TimeLimit = {
 };
 
 export default class TripPresenter {
-  #filtersContainer = null;
-  #eventsContainer = null;
+  #filtersElement = null;
+  #eventsElement = null;
+
   #pointsModel = null;
-  #activePoint = null;
+  #filterModel = null;
+
+  #pointPresenters = new Map();
+  #newPointPresenter = null;
+
   #sortComponent = null;
   #filtersComponent = null;
   #noPointComponent = null;
-  #pointPresenters = new Map();
-  #newPointPresenter = null;
-  #currentSortType = SortType.DEFAULT;
-  #filterType = FilterType.EVERYTHING;
-  #filterModel = null;
-  #isLoading = true;
   #loadingComponent = new LoadingView();
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
     upperLimit: TimeLimit.UPPER_LIMIT
   });
 
+  #currentSortType = SortType.DEFAULT;
+  #filterType = FilterType.EVERYTHING;
+  #activePoint = null;
+  #isLoading = true;
+
   #tripDestinations = [];
 
   constructor({filtersElement, pointsModel, eventsElement, onNewPointDestroy}) {
-    this.#filtersContainer = filtersElement;
-    this.#eventsContainer = eventsElement;
+    this.#filtersElement = filtersElement;
+    this.#eventsElement = eventsElement;
     this.#pointsModel = pointsModel;
     this.#filterModel = new FilterModel();
 
     this.#newPointPresenter = new NewPointPresenter({
-      pointListContainer: eventsElement,
+      pointListElement: eventsElement,
       onDataChange: this.#handleViewAction,
       onDestroy: onNewPointDestroy,
       pointsModel: this.#pointsModel
@@ -57,7 +61,7 @@ export default class TripPresenter {
 
   get tripPoints() {
     this.#filterType = this.#filterModel.filter;
-    const points = [...this.#pointsModel.tripPoints];
+    const points = this.#pointsModel.tripPoints;
     const filteredPoints = filter[this.#filterType](points);
 
     switch (this.#currentSortType) {
@@ -67,7 +71,7 @@ export default class TripPresenter {
         return filteredPoints.sort(sortByPrice);
     }
 
-    return filteredPoints;
+    return filteredPoints.sort(sortByStartDate);
   }
 
   init() {
@@ -79,7 +83,7 @@ export default class TripPresenter {
 
   #renderPoint(point, pointsModel) {
     const pointPresenter = new PointPresenter({
-      eventsContainer: this.#eventsContainer.querySelector('.trip-events__list'),
+      eventsElement: this.#eventsElement.querySelector('.trip-events__list'),
       onDataChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange,
       pointsModel: pointsModel
@@ -220,7 +224,7 @@ export default class TripPresenter {
       onSortTypeChange: this.#handleSortTypeChange
     });
 
-    render(this.#sortComponent, this.#eventsContainer.querySelector('.trip-events__sort-view'), RenderPosition.AFTERBEGIN);
+    render(this.#sortComponent, this.#eventsElement.querySelector('.trip-events__sort-view'), RenderPosition.AFTERBEGIN);
   }
 
   #renderNoPoint() {
@@ -228,16 +232,16 @@ export default class TripPresenter {
       filterType: this.#filterType
     });
 
-    render(this.#noPointComponent, this.#eventsContainer.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
+    render(this.#noPointComponent, this.#eventsElement.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
   }
 
   #renderLoading() {
-    render(this.#loadingComponent, this.#eventsContainer.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
+    render(this.#loadingComponent, this.#eventsElement.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
   }
 
   #renderFilter() {
     const filterPresenter = new FilterPresenter({
-      filterContainer: this.#filtersContainer,
+      filterElement: this.#filtersElement,
       filterModel: this.#filterModel,
       pointsModel: this.#pointsModel
     });
