@@ -66,7 +66,7 @@ ${pointTypes.map((pointType) => (
       <div class="event__available-offers">
         ${allOffers[point.type].map((offer) => (
     `<div class="event__offer-selector">
-          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${point.id}" type="checkbox" name="event-offer-${offer.title}"
+          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${point.id}" data-offer-id="${offer.id}" type="checkbox" name="event-offer-${offer.title}"
 ${point.offers.includes(offer.id) ? 'checked' : ''} ${point.isDisabled ? 'disabled' : ''}>
           <label class="event__offer-label" for="event-offer-${offer.title}-${point.id}">
             <span class="event__offer-title">${offer.title}</span>
@@ -100,15 +100,17 @@ ${point.offers.includes(offer.id) ? 'checked' : ''} ${point.isDisabled ? 'disabl
 }
 
 export default class EditPointView extends AbstractStatefulView {
+  #handleFormSubmit = null;
+  #handleViewClick = null;
+  #handleDeleteClick = null;
+
   #allOffers = null;
   #pointTypes = null;
   #destinations = null;
   #destinationEntity = null;
-  #handleFormSubmit = null;
-  #handleViewClick = null;
+
   #startDatepicker = null;
   #endDatepicker = null;
-  #handleDeleteClick = null;
 
   constructor({point, allOffers, destinationEntity, pointTypes, destinations, onFormSubmit, onViewClick, onDeleteClick}) {
     super();
@@ -214,13 +216,43 @@ export default class EditPointView extends AbstractStatefulView {
     });
   };
 
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+    const newPrice = parseInt(evt.target.value, 10);
+    if (!newPrice || newPrice < 0) {
+      return;
+    }
+    this.updateElement({
+      price: newPrice
+    });
+  };
+
+  #offerChangeHandler = (evt) => {
+    evt.preventDefault();
+    const selectedOffers = [...this._state.offers];
+    const offerId = evt.target.dataset.offerId;
+
+    if (evt.target.checked) {
+      selectedOffers.push(offerId);
+    } else {
+      selectedOffers.splice(selectedOffers.indexOf(offerId), 1);
+    }
+
+    this.updateElement({
+      offers: selectedOffers
+    });
+  };
+
   _restoreHandlers = () => {
+    this.element.querySelector('.event__available-offers')?.addEventListener('change',this.#offerChangeHandler);
+
     this.element.querySelector('.event__save-btn').addEventListener('click', this.#handleSaveButtonClick);
     if (this._state.id) {
       this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleCloseButtonClick);
     }
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeToggleHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
 
     this.#setStartDatepicker();

@@ -25,12 +25,16 @@ export const formatDuration = (duration) => {
   return `${padStart(minutes)}m`;
 };
 
-export function sortByTime(pointA, pointB) {
-  return dayjs(pointB.dateTo).diff(pointB.dateFrom, 'minutes') - dayjs(pointA.dateTo).diff(pointA.dateFrom, 'minutes');
+export function sortByDurationTime(pointA, pointB) {
+  return pointB.duration - pointA.duration;
 }
 
 export function sortByPrice(pointA, pointB) {
   return pointB.price - pointA.price;
+}
+
+export function sortByStartDate(pointA, pointB) {
+  return dayjs(pointA.dateFrom) - dayjs(pointB.dateFrom);
 }
 
 export function isDatesEqual(dateA, dateB) {
