@@ -6,7 +6,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export const DATE_FORMAT = 'MMM D';
-export const TIME_FORMAT = 'hh:mm';
+export const TIME_FORMAT = 'HH:mm';
 export const DATE_FORMAT_FULL = 'DD/MM/YY hh:mm';
 
 const padStart = (number) => String(number).padStart(2, '0');

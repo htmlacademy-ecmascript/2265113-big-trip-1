@@ -22,8 +22,8 @@ export default class PointsModel extends Observable {
   get defaultPoint() {
     return {
       price: 0,
-      dateFrom: new Date().toISOString(),
-      dateTo: new Date().toISOString(),
+      dateFrom: new Date(),
+      dateTo: new Date().fp_incr(1),
       destination: '',
       duration: 0,
       isFavorite: false,

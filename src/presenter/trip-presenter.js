@@ -49,7 +49,7 @@ export default class TripPresenter {
     this.#filterModel = new FilterModel();
 
     this.#newPointPresenter = new NewPointPresenter({
-      pointListElement: eventsElement,
+      pointListElement: this.#eventsElement.querySelector('.trip-events__list'),
       onDataChange: this.#handleViewAction,
       onDestroy: onNewPointDestroy,
       pointsModel: this.#pointsModel
