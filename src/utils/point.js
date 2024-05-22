@@ -6,13 +6,37 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export const DATE_FORMAT = 'MMM D';
-export const TIME_FORMAT = 'hh:mm';
+export const TIME_FORMAT = 'HH:mm';
 export const DATE_FORMAT_FULL = 'DD/MM/YY hh:mm';
 
-export const differenceTime = (toTime, fromTime) => {
-  const diffMin = dayjs.utc(toTime).diff(fromTime, 'minute');
-  const diffHour = dayjs.utc(toTime).diff(fromTime, 'hour');
-  const diffResult = diffMin - diffHour * 60;
-  return diffMin < 60 ? `${diffMin + 1}m` : `${diffHour}h ${diffResult + 1}m`;
+const padStart = (number) => String(number).padStart(2, '0');
+
+export const formatDuration = (duration) => {
+  const days = Math.floor(duration / (60 * 24));
+  const hours = Math.floor((duration % (60 * 24)) / 60);
+  const minutes = Math.floor((duration % (60 * 24)) % 60);
+
+  if (days > 0) {
+    return `${padStart(days)}d ${padStart(hours)}h ${padStart(minutes)}m`;
+  }
+  if (hours > 0) {
+    return `${padStart(hours)}h ${padStart(minutes)}m`;
+  }
+  return `${padStart(minutes)}m`;
 };
 
+export function sortByDurationTime(pointA, pointB) {
+  return pointB.duration - pointA.duration;
+}
+
+export function sortByPrice(pointA, pointB) {
+  return pointB.price - pointA.price;
+}
+
+export function sortByStartDate(pointA, pointB) {
+  return dayjs(pointA.dateFrom) - dayjs(pointB.dateFrom);
+}
+
+export function isDatesEqual(dateA, dateB) {
+  return (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB);
+}
