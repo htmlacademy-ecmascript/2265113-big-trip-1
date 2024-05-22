@@ -4,6 +4,9 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { DATE_FORMAT_FULL } from '../utils/point.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import { AlertMessage } from '../const.js';
+
+const ALERT_SHOW_TIME = 5000;
 
 function createEditPointTemplate(point, allOffers, destinationEntity, pointTypes, destinations) {
   const isDeleting = point.isDeleting ? 'Deleting...' : 'Delete';
@@ -164,6 +167,10 @@ export default class EditPointView extends AbstractStatefulView {
           dateFormat: 'd/m/Y H:i',
           defaultDate: this._state.dateFrom,
           onChange: this.#startTimeChangeHandler,
+          'time_24hr': true,
+          locale: {
+            firstDayOfWeek: 1
+          }
         },
       );
     }
@@ -177,6 +184,10 @@ export default class EditPointView extends AbstractStatefulView {
           dateFormat: 'd/m/Y H:i',
           defaultDate: this._state.dateTo,
           onChange: this.#endTimeChangeHandler,
+          'time_24hr': true,
+          locale: {
+            firstDayOfWeek: 1
+          }
         },
       );
     }
@@ -189,6 +200,21 @@ export default class EditPointView extends AbstractStatefulView {
 
   #handleSaveButtonClick = (evt) => {
     evt.preventDefault();
+    if (this._state.dateTo <= this._state.dateFrom) {
+      this.#showAlert(AlertMessage.DATE);
+      return;
+    }
+
+    if (this._state.price < 1) {
+      this.#showAlert(AlertMessage.PRICE);
+      return;
+    }
+
+    if (!this._state.destination) {
+      this.#showAlert(AlertMessage.DESTINATION);
+      return;
+    }
+
     this.#handleFormSubmit(this._state);
   };
 
@@ -262,5 +288,17 @@ export default class EditPointView extends AbstractStatefulView {
   #formDeleteClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleDeleteClick(this._state);
+  };
+
+  #showAlert = (message) => {
+    const alertContainer = document.createElement('div');
+    alertContainer.classList.add('error__alert');
+    alertContainer.textContent = message;
+
+    document.body.append(alertContainer);
+
+    setTimeout(() => {
+      alertContainer.remove();
+    }, ALERT_SHOW_TIME);
   };
 }
