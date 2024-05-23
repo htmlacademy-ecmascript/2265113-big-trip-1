@@ -112,7 +112,7 @@ export default class TripPresenter {
       return;
     }
 
-    for (let i = 0; i < this.tripPoints.length; i++) {
+    for (let i = 0; i < points.length; i++) {
       this.#renderPoint(points[i], this.#pointsModel);
     }
   }
