@@ -164,6 +164,7 @@ export default class EditPointView extends AbstractStatefulView {
       this.#startDatepicker = flatpickr(this.element.querySelector('.start__date'),
         {
           enableTime: true,
+          minDate: 'today',
           dateFormat: 'd/m/Y H:i',
           defaultDate: this._state.dateFrom,
           onChange: this.#startTimeChangeHandler,
@@ -181,6 +182,7 @@ export default class EditPointView extends AbstractStatefulView {
       this.#endDatepicker = flatpickr(this.element.querySelector('.end__date'),
         {
           enableTime: true,
+          minDate: 'today',
           dateFormat: 'd/m/Y H:i',
           defaultDate: this._state.dateTo,
           onChange: this.#endTimeChangeHandler,

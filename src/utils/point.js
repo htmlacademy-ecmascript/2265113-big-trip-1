@@ -34,7 +34,7 @@ export function sortByPrice(pointA, pointB) {
 }
 
 export function sortByStartDate(pointA, pointB) {
-  return dayjs(pointA.dateFrom) - dayjs(pointB.dateFrom);
+  return pointA.dateFrom - pointB.dateFrom;
 }
 
 export function isDatesEqual(dateA, dateB) {
